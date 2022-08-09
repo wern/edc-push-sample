@@ -1,11 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -o errexit
-set -o errtrace
-set -o pipefail
-set -o nounset
-
-# shellcheck disable=SC2164
 cd edc
 ./gradlew publishToMavenLocal -x test
 
@@ -15,13 +9,5 @@ cd ../edc-controlplane-memory
 cd ../edc-dataplane
 ./gradlew clean build
 
-cd ../publisher-bds
+cd ../api-wrapper
 ./gradlew clean build
-
-
-cd ../receiver-bds
-./gradlew clean build
-
-cd ../frontend
-npm install
-npm run build
