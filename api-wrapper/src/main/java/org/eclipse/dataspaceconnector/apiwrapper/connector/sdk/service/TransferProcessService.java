@@ -3,6 +3,8 @@ package org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okio.Buffer;
+
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.Utility;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
@@ -15,12 +17,14 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
+
 public class TransferProcessService {
     private final Monitor monitor;
     private final TypeManager typeManager;
     private final OkHttpClient httpClient;
 
-    private static final String TRANSFER_PATH = "/control/transfer";
+    private static final String TRANSFER_PATH = "/transferprocess";
 
     public TransferProcessService(Monitor monitor, TypeManager typeManager, OkHttpClient httpClient) {
         this.monitor = monitor;
@@ -61,6 +65,15 @@ public class TransferProcessService {
                 .url(url)
                 .post(requestBody);
         headers.forEach(request::addHeader);
+
+        monitor.debug("Init transfer: " + url);
+        try{
+            final Buffer buffer = new Buffer();
+            requestBody.writeTo(buffer);
+            monitor.debug("Transfer request: " + buffer.readUtf8());
+        }catch(IOException ioe){
+            //ignored
+        }
 
         try (var response = httpClient.newCall(request.build()).execute()) {
             var body = response.body();

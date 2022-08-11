@@ -6,15 +6,19 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.dataspaceconnector.apiwrapper.config.ApiWrapperConfig;
-import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.model.NegotiationStatusResponse;
+import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.model.ContractNegotiationDto;
+import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.model.ContractOfferDescription;
+import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.model.NegotiationInitiateRequestDto;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.ContractNegotiationService;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.ContractOfferService;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.HttpProxyService;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.TransferProcessService;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryContractAgreementStore;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryEndpointDataReferenceStore;
+import org.eclipse.dataspaceconnector.policy.model.Action;
+import org.eclipse.dataspaceconnector.policy.model.Permission;
+import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractOfferRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
 
 import java.io.IOException;
@@ -163,6 +167,8 @@ public class ApiWrapperController {
         }
 
         monitor.info("Initialize contract negotiation");
+
+        // Initiate negotiation
         var contractOffer = contractOfferService.findContractOffer4AssetId(
                 assetId,
                 consumerConnectorUrl,
@@ -170,29 +176,50 @@ public class ApiWrapperController {
                 header
         );
 
+        var patchedPolicy = Policy.Builder.newInstance()
+                                .id(contractOffer.getPolicy().getUid())
+                                .permission(
+                                    Permission.Builder.newInstance()
+                                    .target(assetId)
+                                    .action(Action.Builder.newInstance().type("USE").build())
+                                    .build()
+                                ).build();
+
+        var contractOfferDescription = new ContractOfferDescription(
+            contractOffer.getId(),
+            assetId,
+            null,
+            patchedPolicy
+        );
+
         // Initiate negotiation
-        var contractOfferRequest = ContractOfferRequest.Builder.newInstance()
-                .contractOffer(contractOffer)
+        var contractNegotiationRequest = NegotiationInitiateRequestDto.Builder.newInstance()
+                .offerId(contractOfferDescription)
                 .connectorId("provider")
                 .connectorAddress(providerConnectorUrl + IDS_PATH)
                 .protocol("ids-multipart")
                 .build();
         var negotiationId = contractNegotiationService.initiateNegotiation(
-                contractOfferRequest,
+                contractNegotiationRequest,
                 consumerConnectorUrl,
                 header
         );
 
         // Check negotiation state
-        NegotiationStatusResponse negotiationResponse = null;
+        ContractNegotiationDto negotiationResponse = null;
 
-        while (negotiationResponse == null || !Objects.equals(negotiationResponse.getStatus(), "CONFIRMED")) {
+        while (negotiationResponse == null || !Objects.equals(negotiationResponse.getState(), "CONFIRMED")) {
             Thread.sleep(1000);
-            negotiationResponse = contractNegotiationService.getNegotiationState(
-                    negotiationId,
-                    consumerConnectorUrl,
-                    header
-            );
+
+            try{
+                negotiationResponse = contractNegotiationService.getNegotiationState(
+                        negotiationId,
+                        consumerConnectorUrl,
+                        header
+                );
+            }catch (IOException ioe){
+                // retry for now...
+            }
         }
 
         agreementId = negotiationResponse.getContractAgreementId();
