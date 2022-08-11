@@ -45,6 +45,21 @@ services:
       - ./config/Provider/docker/dataplane.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
 
+  provider-apiwrapper:
+    build:
+      context: api-wrapper
+      args:
+        JAR: build/libs/edc.jar
+    ports:
+      - "3131:3131" # Wrapper endpoint (callback 3132 needed only internaly)
+      - "4007:8090" # debugging
+    environment:
+      CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
+      LOGGING_PROPERTIES_FILE: /app/logging.properties
+    volumes:
+      - ./config/Provider/docker/api-wrapper.configuration.properties:/app/configuration.properties
+      - ./config/Provider/docker/logging.properties:/app/logging.properties
+
   consumer-controlplane:
     build:
       context: edc-controlplane-memory
@@ -55,7 +70,7 @@ services:
       - "9191:9191" # default/control
       - "9194:9194" # validation
       - "9192:9192" # data
-      - "4007:8090" # debugging
+      - "4008:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -76,7 +91,7 @@ services:
     ports:
       - "9291:9291" # default (8192:9191)
       - "9292:9292" # public (8183:9192)
-      - "4008:8090" # debugging
+      - "4009:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -87,4 +102,19 @@ services:
       - ./certs/cert.pfx:/app/cert.pfx
       - ./config/Consumer/docker/vault.properties:/app/vault.properties
       - ./config/Consumer/docker/dataplane.configuration.properties:/app/configuration.properties
+      - ./config/Consumer/docker/logging.properties:/app/logging.properties
+
+  consumer-apiwrapper:
+    build:
+      context: api-wrapper
+      args:
+        JAR: build/libs/edc.jar
+    ports:
+      - "2121:2121" # Wrapper endpoint (callback 2122 needed only internaly)
+      - "4010:8090" # debugging
+    environment:
+      CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
+      LOGGING_PROPERTIES_FILE: /app/logging.properties
+    volumes:
+      - ./config/Consumer/docker/api-wrapper.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
