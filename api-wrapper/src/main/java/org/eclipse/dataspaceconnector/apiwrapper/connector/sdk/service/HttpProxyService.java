@@ -49,6 +49,19 @@ public class HttpProxyService {
         return sendRequest(request);
     }
 
+    public String sendPUTRequest(EndpointDataReference dataReference, String subUrl, MultivaluedMap<String, String> parameters, String data, MediaType mediaType) throws IOException {
+        var url = getUrl(dataReference.getEndpoint(), subUrl, parameters);
+
+        var request = new Request.Builder()
+                .url(url)
+                .addHeader(dataReference.getAuthKey(), dataReference.getAuthCode())
+                .addHeader("Content-Type", mediaType.toString())
+                .put(RequestBody.create(data, mediaType))
+                .build();
+
+        return sendRequest(request);
+    }
+
     private HttpUrl getUrl(String connectorUrl, String subUrl, MultivaluedMap<String, String> parameters) {
         var url = connectorUrl;
 

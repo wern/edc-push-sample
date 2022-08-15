@@ -79,22 +79,7 @@ public class ApiWrapperController {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
         // Initialize and negotiate everything
-        var agreementId = initializeContractNegotiation(providerConnectorUrl, assetId);
-
-        // Initiate transfer process
-        transferProcessService.initiateHttpProxyTransferProcess(
-                agreementId,
-                assetId,
-                consumerConnectorUrl,
-                providerConnectorUrl + IDS_PATH,
-                header
-        );
-
-        EndpointDataReference dataReference = null;
-        while (dataReference == null) {
-            Thread.sleep(1000);
-            dataReference = endpointDataReferenceStore.get(agreementId);
-        }
+        var dataReference = negotiateContractAndRetrieveEndpointDataReference(providerConnectorUrl, assetId);
 
         // Get data through data plane
         String data = "";
@@ -119,22 +104,7 @@ public class ApiWrapperController {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
         // Initialize and negotiate everything
-        var agreementId = initializeContractNegotiation(providerConnectorUrl, assetId);
-
-        // Initiate transfer process
-        transferProcessService.initiateHttpProxyTransferProcess(
-                agreementId,
-                assetId,
-                consumerConnectorUrl,
-                providerConnectorUrl + IDS_PATH,
-                header
-        );
-
-        EndpointDataReference dataReference = null;
-        while (dataReference == null) {
-            Thread.sleep(1000);
-            dataReference = endpointDataReferenceStore.get(agreementId);
-        }
+        var dataReference = negotiateContractAndRetrieveEndpointDataReference(providerConnectorUrl, assetId);
 
         // Get data through data plane
         String data = "";
@@ -156,6 +126,59 @@ public class ApiWrapperController {
             monitor.severe("Call against consumer control plane failed!", e);
         }
         return data;
+    }
+
+    @PUT
+    @Path("/{assetId}/{subUrl:.+}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String putWrapper(@QueryParam("provider-connector-url") String providerConnectorUrl, @PathParam("assetId") String assetId, @PathParam("subUrl") String subUrl, String body, @Context UriInfo uriInfo) throws InterruptedException {
+        MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+
+        // Initialize and negotiate everything
+        var dataReference = negotiateContractAndRetrieveEndpointDataReference(providerConnectorUrl, assetId);
+
+        // Get data through data plane
+        String data = "";
+        try {
+            data = httpProxyService.sendPUTRequest(
+                    dataReference,
+                    subUrl,
+                    queryParams,
+                    body,
+                    Objects.requireNonNull(okhttp3.MediaType.parse("application/json"))
+            );
+            Matcher dataMatcher = RESPONSE_PATTERN.matcher(data);
+            while (dataMatcher.matches()) {
+                data = dataMatcher.group("embeddedData");
+                data = data.replace("\\\"", "\"").replace("\\\\", "\\");
+                dataMatcher = RESPONSE_PATTERN.matcher(data);
+            }
+        } catch (IOException e) {
+            monitor.severe("Call against consumer control plane failed!", e);
+        }
+        return data;
+    }
+
+    private EndpointDataReference negotiateContractAndRetrieveEndpointDataReference(String providerConnectorUrl, String assetId) throws InterruptedException{
+        // Initialize and negotiate everything
+        var agreementId = initializeContractNegotiation(providerConnectorUrl, assetId);
+
+        // Initiate transfer process
+        transferProcessService.initiateHttpProxyTransferProcess(
+                agreementId,
+                assetId,
+                consumerConnectorUrl,
+                providerConnectorUrl + IDS_PATH,
+                header
+        );
+
+        EndpointDataReference dataReference = null;
+        while (dataReference == null) {
+            Thread.sleep(1000);
+            dataReference = endpointDataReferenceStore.get(agreementId);
+        }
+
+        return dataReference;
     }
 
     private String initializeContractNegotiation(String providerConnectorUrl, String assetId) throws InterruptedException {
