@@ -1,0 +1,80 @@
+# Copyright (c) 2021-2022 T-Systems International GmbH (Catena-X Consortium)
+#
+# See the AUTHORS file(s) distributed with this work for additional
+# information regarding authorship.
+#
+# See the LICENSE file(s) distributed with this work for
+# additional information regarding license terms.
+#
+
+server:
+  port: 4243
+  ssl:
+    key-store-password: __KEYSTOREPASSWORD__
+    key-store: classpath:conf/__KEYSTOREFILENAME__.p12
+    key-store-type: PKCS12
+    key-alias: 1
+    enabled: false
+  forward-headers-strategy: framework
+
+http:
+  timeout:
+    write: 10000
+    connect: 10000
+    call: 10000
+    read: 10000
+
+spring:
+  application:
+    name: semantics-services
+  banner:
+    location: "classpath:banner.txt"
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 215MB
+      file-size-threshold: 2KB
+  jackson:
+    default-property-inclusion: non_null
+
+registry:
+  idm:
+    public-client-id: catenax-portal
+
+springdoc:
+  cache:
+    disabled: true
+  api-docs:
+    enabled: false
+  swagger-ui:
+    path: /
+    urls:
+     - name: AAS Registry API
+       url: /aas-registry-openapi.yaml
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      # the scopes and client id will be prefilled in the swagger ui
+      scopes: openid profile
+      client-id: ${registry.idm.public-client-id}
+
+title: '@project.name@'
+project_desc: '@project.description@'
+contact_email: '@email@'
+licence: '@licence_name@'
+contact_url: '@project.url@'
+licence_url: '@licence_url@'
+organization_name: '@project.organization.name@'
+version: '@project.version@'
+    
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    info:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
