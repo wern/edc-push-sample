@@ -41,6 +41,11 @@ dependencies {
     // IAM
     api("$edcGroup:iam-mock:$edcVersion")
 
+    // SDK
+    api("$edcGroup:contract-spi:$edcVersion")
+    api("$edcGroup:core-spi:$edcVersion")
+    api("$edcGroup:policy-spi:$edcVersion")
+
     // Telemetry
     api("$edcGroup:core-micrometer:$edcVersion")
     api("$edcGroup:jersey-micrometer:$edcVersion")
