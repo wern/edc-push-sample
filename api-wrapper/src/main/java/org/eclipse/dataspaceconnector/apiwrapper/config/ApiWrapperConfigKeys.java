@@ -14,6 +14,12 @@ public final class ApiWrapperConfigKeys {
     public static final String CONSUMER_EDC_APIKEY_VALUE = "wrapper.consumer.edc.apikey.value";
 
     @EdcSetting
+    public static final String AUTH_APIKEY_NAME = "wrapper.auth.apikey.name";
+    
+    @EdcSetting
+    public static final String AUTH_APIKEY_VALUE = "wrapper.auth.apikey.value";
+
+    @EdcSetting
     public static final String BASIC_AUTH = "wrapper.auth.basic";
 
     private ApiWrapperConfigKeys() {}

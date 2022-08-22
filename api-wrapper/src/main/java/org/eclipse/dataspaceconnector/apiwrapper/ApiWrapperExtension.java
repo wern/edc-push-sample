@@ -12,9 +12,11 @@ import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.ContractN
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.ContractOfferService;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.HttpProxyService;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.TransferProcessService;
+import org.eclipse.dataspaceconnector.apiwrapper.security.APIKeyAuthenticationService;
 import org.eclipse.dataspaceconnector.apiwrapper.security.BasicAuthenticationService;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryContractAgreementStore;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryEndpointDataReferenceStore;
+import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
@@ -62,8 +64,14 @@ public class ApiWrapperExtension implements ServiceExtension {
         webService.registerResource(new EdcApiExceptionMapper()); //ToDo handle msissing exceptions
         webService.registerResource(CALLBACK_CONTEXT_ALIAS, new EdcApiExceptionMapper());
 
-        // Register basic authentication filter
-        if (!config.getBasicAuthUsers().isEmpty()) {
+        // Register API Key filter if configured
+        if (config.getAuthApiKeyValue() != null && !config.getAuthApiKeyValue().isEmpty()) {
+            var authService = new APIKeyAuthenticationService(context.getMonitor(), config.getAuthEdcApiKeyName(), config.getAuthApiKeyValue());
+            webService.registerResource(new AuthenticationRequestFilter(authService));
+        }
+
+        // Register basic authentication filter if configured
+        if (config.getBasicAuthUsers() != null && !config.getBasicAuthUsers().isEmpty()) {
             var authService = new BasicAuthenticationService(context.getMonitor(), config.getBasicAuthUsers());
             webService.registerResource(new AuthenticationRequestFilter(authService));
         }
@@ -106,8 +114,21 @@ public class ApiWrapperExtension implements ServiceExtension {
             builder.consumerEdcApiKeyValue(consumerEdcApiKeyValue);
         }
 
+        var authApiKeyName = config.getString(ApiWrapperConfigKeys.AUTH_APIKEY_NAME, null);
+        if (authApiKeyName != null) {
+            builder.authApiKeyName(authApiKeyName);
+        }
+
+        var authApiKeyValue = config.getString(ApiWrapperConfigKeys.AUTH_APIKEY_VALUE, null);
+        if (authApiKeyValue != null) {
+            builder.authApiKeyValue(authApiKeyValue);
+        }
+
         var basicAuthUsers = config.getConfig(ApiWrapperConfigKeys.BASIC_AUTH).getRelativeEntries();
         if (!basicAuthUsers.isEmpty()) {
+            if(authApiKeyValue != null){
+                throw new EdcException("API-Key and Basic Auth User cannot be configured at the same time!");
+            }
             builder.basicAuthUsers(basicAuthUsers);
         }
 
