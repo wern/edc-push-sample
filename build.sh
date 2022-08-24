@@ -11,3 +11,6 @@ cd ../edc-dataplane
 
 cd ../api-wrapper
 ./gradlew clean build
+
+cd ../clients/pcf-demo-provider
+./gradlew clean build

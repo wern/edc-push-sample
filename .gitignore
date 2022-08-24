@@ -1,5 +1,6 @@
 api-wrapper/bin/
 edc-controlplane-memory/bin
+pcf-demo-provider/bin
 build/
 target/
 lib/
