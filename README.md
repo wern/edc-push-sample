@@ -17,8 +17,6 @@ To build all components in one command, execute the following script.
 
 ## Run self-build multiple docker container setup 
 
-There is no API Wrapper incl. yet.
-
 ```shell
-docker-compose up --build
+docker-compose -f docker-compose-buildit.yml up --build
 ```
