@@ -20,6 +20,8 @@ public class AutoConfigExtension implements ServiceExtension {
     private static final String POLICY_ID = "8f4dfcfb-a4fb-4582-96b9-7984309e44a8";
     private static final String ASSET_ID = "pcf.asset.id";
     private static final String PCF_ENDPOINT = "pcf.asset.endpoint";
+    private static final String AUTH_KEY = "pcf.asset.auth.key";
+    private static final String AUTH_CODE = "pcf.asset.auth.code";
 
     @Inject
     private ContractDefinitionStore contractStore;
@@ -60,19 +62,34 @@ public class AutoConfigExtension implements ServiceExtension {
 
     private void registerDataEntries(ServiceExtensionContext context) {
 
+        var monitor = context.getMonitor();
+
         var endpointURL = context.getSetting(PCF_ENDPOINT, "not set!");
         var assetID = context.getSetting(ASSET_ID, "42424242424242");
+        var authKey = context.getSetting(AUTH_KEY, "");
+        var authCode = context.getSetting(AUTH_CODE, "");
+        var stuff = context.getSetting("pcf.stuff", "");
 
-        context.getMonitor().debug("Using endpoint '"+ endpointURL +"'");
+        monitor.debug("Using endpoint '"+ endpointURL +"'");
+        monitor.debug("Using authKey '"+ authKey +"'");
+        monitor.debug("Using authCode '"+ authCode +"'");
 
-        var dataAddress = DataAddress.Builder.newInstance()
+        var dataAddressBuilder = DataAddress.Builder.newInstance()
                 .property("type", "HttpData")
                 .property("endpoint", endpointURL)
                 .property("proxyMethod", "true")
                 .property("proxyBody", "true")
                 .property("proxyPath", "true")
-                .property("proxyQueryParams", "true")
-                .build();
+                .property("proxyQueryParams", "true");
+
+        if(authKey!=null && authCode!=null){
+            dataAddressBuilder.property("authKey", authKey)
+                              .property("authCode", authCode);
+        } else {
+            monitor.warning("No authorization info configured for asset " + assetID);
+        }
+
+        var dataAddress = dataAddressBuilder.build();
 
         var asset = Asset.Builder.newInstance()
                 .id(assetID)
