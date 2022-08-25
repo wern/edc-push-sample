@@ -3,39 +3,53 @@ curl --location --request PUT 'http://localhost:3131/api/service/194f0160-cef1-4
 --header 'Content-Type: application/json' \
 --data-raw '{
     "data": {
+        "id": "3893bb5d-da16-4dc1-9185-11d97476c254",
+        "specVersion": "1.0.0",
+        "version": 42,
+        "created": "2022-05-22T21:47:32Z",
+        "updated": "2022-05-22T21:47:35Z",
+        "companyName": "My Corp",
+        "companyIds": [
+            "urn:uuid:51131FB5-42A2-4267-A402-0ECFEFAD1619",
+            "urn:epc:id:sgln:4063973.00000.8"
+        ],
+        "productDescription": "Cote’d Or Ethanol",
+        "productIds": [
+            "urn:gtin:4712345060507"
+        ],
+        "productCategoryCpc": "3342",
+        "productNameCompany": "Green Ethanol Volnay",
+        "comment": "",
         "pcf": {
-            "carbonEmissions": "0.47",
-            "biogenicEmissions": "0.01",
-            "landUseEmissions": "0.01",
-            "reportingPeriodStart": "2020-07-01T00:00:00.000Z",
-            "reportingPeriodEnd": "2021-07-01T00:00:00.000Z",
-            "geographyCountry": "EU",
-            "geographySubregion": null,
-            "primaryDataShare": 100,
-            "emissionFactorSources": [],
-            "boundaryProcesses": "End-of-life included",
-            "boundaryGate": "Cradle-to-gate",
-            "crossSectoralStandardsUsed": [
-                "ISO Standard 14044"
+            "declaredUnit": "liter",
+            "unitaryProductAmount": "12.0",
+            "fossilGhgEmissions": "0.123",
+            "biogenicEmissions": {
+                "landUseEmissions": "0.001",
+                "otherEmissions": "0"
+            },
+            "biogenicCarbonContent": "0.0",
+            "reportingPeriodStart": "2021-01-01T00:00:00Z",
+            "reportingPeriodEnd": "2022-01-01T00:00:00Z",
+            "primaryDataShare": 56.12,
+            "emissionFactorSources": [
+                {
+                    "name": "Ecoinvent",
+                    "version": "1.2.3"
+                }
             ],
-            "productSpecificRules": [],
-            "allocationRules": null
-        },
-        "id": "639HR-F",
-        "version": "9.6.3",
-        "companyName": "Solvay",
-        "companyId": [
-            "urn:epc:id:fbrx:4346073.00000.4"
-        ],
-        "productDescription": "production",
-        "productId": [
-            "urn:epc:id:vasy:7494489.00000.9"
-        ],
-        "productCategoryCpc": "1620",
-        "productNameCompany": "Chlorine",
-        "declaredUnit": "kg",
-        "declaredUnitAmount": "1",
-        "waterContent": 1,
-        "comment": ""
+            "boundaryProcessesDescription": "End-of-life included",
+            "crossSectoralStandardsUsed": [
+                "GHG Protocol Product standard"
+            ],
+            "productOrSectorSpecificRules": [
+                {
+                    "operator": "EPD International",
+                    "ruleNames": [
+                        "ABC 2021"
+                    ]
+                }
+            ]
+        }
     }
 }'
