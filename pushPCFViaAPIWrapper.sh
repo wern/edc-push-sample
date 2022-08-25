@@ -1,4 +1,4 @@
-curl --location --request POST 'http://localhost:3131/api/service/194f0160-cef1-4cb3-a6f1-1d917b4e39c0-fec89cf0-9382-4d68-8cea-dae797b7b8ae/productId/some?BPN=BPNL6352416&requestId=24356C6&provider-connector-url=http://consumer-controlplane:9193' \
+curl --location --request PUT 'http://localhost:3131/api/service/194f0160-cef1-4cb3-a6f1-1d917b4e39c0-fec89cf0-9382-4d68-8cea-dae797b7b8ae/productId/some?BPN=BPNL6352416&requestId=24356C6&provider-connector-url=http://consumer-controlplane:9193' \
 --header 'X-ApiKey APIpassword' \
 --header 'Content-Type: application/json' \
 --data-raw '{
