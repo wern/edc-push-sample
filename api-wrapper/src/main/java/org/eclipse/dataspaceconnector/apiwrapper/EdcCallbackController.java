@@ -26,5 +26,6 @@ public class EdcCallbackController {
         String contractId = dataReference.getProperties().get(DataPlaneConstants.CONTRACT_ID);
         endpointDataReferenceStore.put(contractId, dataReference);
         monitor.debug("Endpoint Data Reference received and stored for agreement: " + contractId);
+        monitor.debug("Using endpoint: " + dataReference.getEndpoint());
     }
 }
