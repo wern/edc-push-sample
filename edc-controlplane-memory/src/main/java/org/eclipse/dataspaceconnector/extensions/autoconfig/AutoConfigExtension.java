@@ -34,6 +34,7 @@ public class AutoConfigExtension implements ServiceExtension {
     private static final String IDP_URL = "pcf.asset.auth.oidc.idp.url";
     private static final String CLIENT_ID = "pcf.asset.auth.oidc.client.id";
     private static final String CLIENT_SECRET = "pcf.asset.auth.oidc.client.secret";
+    private static final String AUTH_AUDIENCE = "pcf.asset.auth.oidc.auth.audience";
 
 
     @Inject
@@ -77,18 +78,23 @@ public class AutoConfigExtension implements ServiceExtension {
                 var idpUrl = context.getSetting(IDP_URL, "");
                 var clientId = context.getSetting(CLIENT_ID, "");
                 var clientSecret = context.getSetting(CLIENT_SECRET, "");
+                var audience = context.getSetting(AUTH_AUDIENCE, "");
 
-                if( idpUrl.isBlank() || clientId.isBlank() || clientSecret.isBlank()){
+                if( isIdpConfigurationMissing(idpUrl, clientId, clientSecret, audience)){
                     monitor.info("No IDP information configured. Token refresh disabled!");
                     return;
                 }
 
                 try{
-                    registerDataEntries(context, "Bearer " + loginService.getToken(idpUrl, clientId, clientSecret), true); 
+                    registerDataEntries(context, "Bearer " + loginService.getToken(idpUrl, clientId, clientSecret, audience), true); 
                 }catch(Throwable t){
                     monitor.severe("Something went wrong while recreationg the asset", t);
                 }
                 monitor.debug("Done!");
+            }
+
+            private boolean isIdpConfigurationMissing(String idpUrl, String clientId, String clientSecret, String audience) {
+                return idpUrl.isBlank() || clientId.isBlank() || clientSecret.isBlank() || audience.isBlank();
             }
          };
          schedulerHandle =

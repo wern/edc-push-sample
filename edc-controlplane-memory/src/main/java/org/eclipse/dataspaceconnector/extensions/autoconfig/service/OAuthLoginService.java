@@ -1,7 +1,6 @@
 package org.eclipse.dataspaceconnector.extensions.autoconfig.service;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.eclipse.dataspaceconnector.extensions.autoconfig.model.TokenResponse;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
@@ -26,22 +25,23 @@ public class OAuthLoginService {
         this.httpClient = httpClient;
     }
 
-    public String getToken(String idpUrl, String clientId, String clientSecret) throws IOException {
+    public String getToken(String idpUrl, String clientId, String clientSecret, String audience) throws IOException {
         TokenResponse tokenResponse = new ObjectMapper()
                                         .setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
                                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                                         .readValue(
-                                            sendPOSTRequest(idpUrl, clientId,clientSecret), 
+                                            sendPOSTRequest(idpUrl, clientId, clientSecret, audience), 
                                             TokenResponse.class);
         return tokenResponse.access_token;
     }
 
-    public String sendPOSTRequest(String url, String clientId, String clientSecret) throws IOException {
+    public String sendPOSTRequest(String url, String clientId, String clientSecret, String audience) throws IOException {
        
         RequestBody formBody = new FormBody.Builder()
                 .addEncoded("grant_type", "client_credentials")
                 .addEncoded("client_id", clientId)
                 .addEncoded("client_secret", clientSecret)
+                .addEncoded("audience", audience)
                 .build();
 
         var request = new Request.Builder()
