@@ -39,7 +39,9 @@ dependencies {
     api("$edcGroup:data-plane-transfer-sync:$edcVersion")
 
     // IAM
-    api("$edcGroup:iam-mock:$edcVersion")
+    //api("$edcGroup:iam-mock:$edcVersion")
+    api("$edcGroup:iam-daps:$edcVersion")
+    api("$edcGroup:oauth2-core:$edcVersion")
 
     // SDK
     api("$edcGroup:contract-spi:$edcVersion")

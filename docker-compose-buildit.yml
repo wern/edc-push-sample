@@ -19,7 +19,7 @@ services:
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./certs/cert.pfx:/app/cert.pfx
+      - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Provider/docker/vault.properties:/app/vault.properties
       - ./config/Provider/docker/controlplane.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
@@ -40,7 +40,7 @@ services:
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./certs/cert.pfx:/app/cert.pfx
+      - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Provider/docker/vault.properties:/app/vault.properties
       - ./config/Provider/docker/dataplane.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
@@ -78,7 +78,7 @@ services:
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./certs/cert.pfx:/app/cert.pfx
+      - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Consumer/docker/vault.properties:/app/vault.properties
       - ./config/Consumer/docker/controlplane.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
@@ -99,7 +99,7 @@ services:
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./certs/cert.pfx:/app/cert.pfx
+      - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Consumer/docker/vault.properties:/app/vault.properties
       - ./config/Consumer/docker/dataplane.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
