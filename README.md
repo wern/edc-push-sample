@@ -34,6 +34,12 @@ Add your own certificates (registered with DAPS) to the keystores and vaults.
 ./config/Provider/docker/vault.properties
 ```
 
+## Run it without using DAPS (local testing only!)
+Want to use mock-IAM only and git rid of all the DAPS configuration stuff? Just checkout the corresponding version using:
+```shell
+git checkout df8395ee
+```
+
 ## Run self-build multiple docker container setup 
 
 ```shell
