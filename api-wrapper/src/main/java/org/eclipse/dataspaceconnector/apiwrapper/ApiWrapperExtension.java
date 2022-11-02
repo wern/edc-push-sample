@@ -84,7 +84,7 @@ public class ApiWrapperExtension implements ServiceExtension {
         var contractOfferService = new ContractOfferService(monitor, typeManager, httpClient);
         var contractOfferRequestService = new ContractNegotiationService(monitor, typeManager, httpClient);
         var transferProcessService = new TransferProcessService(monitor, typeManager, httpClient);
-        var httpProxyService = new HttpProxyService(monitor, httpClient);
+        var httpProxyService = new HttpProxyService(monitor, httpClient, new HttpProxyService.DataFixes(config.fixNotNullFields(), monitor));
 
         webService.registerResource(DEFAULT_CONTEXT_ALIAS, new ApiWrapperController(
                 monitor,
@@ -131,6 +131,9 @@ public class ApiWrapperExtension implements ServiceExtension {
             }
             builder.basicAuthUsers(basicAuthUsers);
         }
+
+        //Enable some temporary data fixes, if needed
+        builder.fixNotNullFields(config.getString(ApiWrapperConfigKeys.DATA_FIX_NOTNULL_FIELDS,"").split(","));
 
         return builder.build();
     }

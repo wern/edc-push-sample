@@ -17,12 +17,44 @@ import java.util.Objects;
 import static java.lang.String.format;
 
 public class HttpProxyService {
+    public static class DataFixes {
+        private final Monitor monitor;
+        private final List<String> fixNotNullFields;
+
+        public DataFixes(List<String> fixNotNullFields, Monitor monitor){
+            this.fixNotNullFields = fixNotNullFields;
+            this.monitor = monitor;
+        }
+       
+        String fixData(String data) {
+            String retValue = data;
+            if(fixNotNullFields != null & !fixNotNullFields.isEmpty()) {
+                monitor.debug("Data to fix:\n" + retValue);
+                for(String fieldName : fixNotNullFields) {
+                    monitor.debug("Fixing '"+ fieldName + "'..."); 
+                    // This is really ugly and should be removed once versioning in test datamodel is fixed :( 
+                    if(fieldName.equals("specVersion")){
+                        retValue = retValue.replace("\""+ fieldName +"\":null", "\""+ fieldName +"\":\"1.0.0\"");
+                    } else {
+                        retValue = retValue.replace("\""+ fieldName +"\":null", "\""+ fieldName +"\":\"\"");
+                    }
+                }
+                monitor.debug("Data after fix:\n" + retValue);
+            } else {
+                monitor.debug("Nothing to fix here ;)");
+            }
+            return retValue;
+        }
+    }
+
     private final Monitor monitor;
     private final OkHttpClient httpClient;
+    private final DataFixes dataFixes;
 
-    public HttpProxyService(Monitor monitor, OkHttpClient httpClient) {
+    public HttpProxyService(Monitor monitor, OkHttpClient httpClient, DataFixes dataFixes) {
         this.monitor = monitor;
         this.httpClient = httpClient;
+        this.dataFixes = dataFixes;
     }
 
     public String sendGETRequest(EndpointDataReference dataReference, String subUrl, MultivaluedMap<String, String> parameters) throws IOException {
@@ -43,7 +75,7 @@ public class HttpProxyService {
                 .url(url)
                 .addHeader(dataReference.getAuthKey(), dataReference.getAuthCode())
                 .addHeader("Content-Type", mediaType.toString())
-                .post(RequestBody.create(data, mediaType))
+                .post(RequestBody.create(dataFixes.fixData(data), mediaType))
                 .build();
 
         return sendRequest(request);
@@ -56,7 +88,7 @@ public class HttpProxyService {
                 .url(url)
                 .addHeader(dataReference.getAuthKey(), dataReference.getAuthCode())
                 .addHeader("Content-Type", mediaType.toString())
-                .put(RequestBody.create(data, mediaType))
+                .put(RequestBody.create(dataFixes.fixData(data), mediaType))
                 .build();
 
         return sendRequest(request);

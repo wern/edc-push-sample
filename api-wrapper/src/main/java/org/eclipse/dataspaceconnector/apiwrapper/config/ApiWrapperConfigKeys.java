@@ -22,5 +22,8 @@ public final class ApiWrapperConfigKeys {
     @EdcSetting
     public static final String BASIC_AUTH = "wrapper.auth.basic";
 
+    @EdcSetting
+    public static final String DATA_FIX_NOTNULL_FIELDS="wrapper.data.fix.notnullable.fields";
+
     private ApiWrapperConfigKeys() {}
 }
