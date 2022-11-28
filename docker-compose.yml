@@ -16,6 +16,7 @@ services:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
       EDC_KEYSTORE_PASSWORD: 123456
+      EDC_API_AUTH_KEY: password
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
@@ -54,6 +55,8 @@ services:
       - "3131:3131" # Wrapper endpoint (callback 3132 needed only internaly)
       - "4007:8090" # debugging
     environment:
+      WRAPPER_CONSUMER_EDC_APIKEY_VALUE: password
+      WRAPPER_AUTH_APIKEY_VALUE: APIpassword
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
@@ -75,6 +78,7 @@ services:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
       EDC_KEYSTORE_PASSWORD: 123456
+      EDC_API_AUTH_KEY: password
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
@@ -113,6 +117,8 @@ services:
       - "2121:2121" # Wrapper endpoint (callback 2122 needed only internaly)
       - "4010:8090" # debugging
     environment:
+      WRAPPER_CONSUMER_EDC_APIKEY_VALUE: password
+      WRAPPER_AUTH_APIKEY_VALUE: APIpassword
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:

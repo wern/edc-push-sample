@@ -2,10 +2,12 @@ package org.eclipse.dataspaceconnector.apiwrapper;
 
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response.Status;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.api.auth.AuthenticationRequestFilter;
-import org.eclipse.dataspaceconnector.api.exception.*;
-import org.eclipse.dataspaceconnector.api.exception.mappers.EdcApiExceptionMapper;
+import org.eclipse.dataspaceconnector.spi.exception.*;
 import org.eclipse.dataspaceconnector.apiwrapper.config.ApiWrapperConfig;
 import org.eclipse.dataspaceconnector.apiwrapper.config.ApiWrapperConfigKeys;
 import org.eclipse.dataspaceconnector.apiwrapper.connector.sdk.service.ContractNegotiationService;
@@ -16,31 +18,58 @@ import org.eclipse.dataspaceconnector.apiwrapper.security.APIKeyAuthenticationSe
 import org.eclipse.dataspaceconnector.apiwrapper.security.BasicAuthenticationService;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryContractAgreementStore;
 import org.eclipse.dataspaceconnector.apiwrapper.store.InMemoryEndpointDataReferenceStore;
+import org.eclipse.dataspaceconnector.spi.ApiErrorDetail;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.WebService;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.configuration.Config;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ApiWrapperExtension implements ServiceExtension {
+
+    public class EdcApiExceptionMapper implements ExceptionMapper<EdcApiException> {
+        private final Map<Class<? extends Throwable>, Response.Status> exceptionMap;
+    
+        public EdcApiExceptionMapper(Map<Class<? extends Throwable>, Response.Status> exceptionMap) {
+            this. exceptionMap = exceptionMap;
+        }
+    
+        @Override
+        public Response toResponse(EdcApiException exception) {
+            var status = exceptionMap.getOrDefault(exception.getClass(), Status.INTERNAL_SERVER_ERROR);
+    
+            var errorDetails = exception.getMessages().stream()
+                    .map(message -> ApiErrorDetail.Builder.newInstance()
+                            .message(message)
+                            .type(exception.getType())
+                            .build()
+                    )
+                    .collect(Collectors.toList());
+    
+            return Response.status(status)
+                    .entity(errorDetails)
+                    .build();
+        }
+    }
 
     private static final String DEFAULT_CONTEXT_ALIAS = "default";
     private static final String CALLBACK_CONTEXT_ALIAS = "callback";
 
-    private final Map<Class<? extends Throwable>, Integer> exceptionMapper = Map.of(
-            IllegalArgumentException.class, 400,
-            NullPointerException.class, 400,
-            AuthenticationFailedException.class, 401,
-            NotAuthorizedException.class, 403,
-            ObjectNotFoundException.class, 404,
-            NotFoundException.class, 404,
-            NotAllowedException.class, 405,
-            ObjectExistsException.class, 409,
-            ObjectNotModifiableException.class, 423,
-            UnsupportedOperationException.class, 501
+    private final Map<Class<? extends Throwable>, Response.Status> exceptionMapping = Map.of(
+            IllegalArgumentException.class, Status.BAD_REQUEST,
+            NullPointerException.class, Status.BAD_REQUEST,
+            AuthenticationFailedException.class, Status.UNAUTHORIZED,
+            NotAuthorizedException.class, Status.FORBIDDEN,
+            ObjectNotFoundException.class, Status.NOT_FOUND,
+            NotFoundException.class, Status.NOT_FOUND,
+            NotAllowedException.class, Status.METHOD_NOT_ALLOWED,
+            ObjectExistsException.class, Status.CONFLICT,
+           // ObjectNotModifiableException.class, 423,
+            UnsupportedOperationException.class, Status.NOT_IMPLEMENTED
     );
 
     @Inject
@@ -51,7 +80,7 @@ public class ApiWrapperExtension implements ServiceExtension {
 
     @Override
     public String name() {
-        return "AAS-API-Wrapper";
+        return "PCF-API-Wrapper";
     }
 
     @Override
@@ -61,8 +90,8 @@ public class ApiWrapperExtension implements ServiceExtension {
         var typeManager = context.getTypeManager();
 
         // Map exceptions to proper status codes
-        webService.registerResource(new EdcApiExceptionMapper()); //ToDo handle msissing exceptions
-        webService.registerResource(CALLBACK_CONTEXT_ALIAS, new EdcApiExceptionMapper());
+        webService.registerResource(new EdcApiExceptionMapper(exceptionMapping));
+        webService.registerResource(CALLBACK_CONTEXT_ALIAS, new EdcApiExceptionMapper(exceptionMapping));
 
         // Register API Key filter if configured
         if (config.getAuthApiKeyValue() != null && !config.getAuthApiKeyValue().isEmpty()) {

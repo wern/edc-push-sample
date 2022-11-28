@@ -34,9 +34,14 @@ dependencies {
     api("$edcGroup:core-boot:$edcVersion")
     api("$edcGroup:transfer:$edcVersion")
     api("$edcGroup:contract:$edcVersion")
+    api("$edcGroup:control-plane-core:$edcVersion")
+    api("$edcGroup:auth-tokenbased:$edcVersion")
 
     // Data-Plane
     api("$edcGroup:data-plane-transfer-sync:$edcVersion")
+    api("$edcGroup:data-plane-selector-core:$edcVersion")
+    api("$edcGroup:data-plane-selector-client:$edcVersion")
+    api("$edcGroup:data-plane-selector-spi:$edcVersion")
 
     // IAM
     //api("$edcGroup:iam-mock:$edcVersion")

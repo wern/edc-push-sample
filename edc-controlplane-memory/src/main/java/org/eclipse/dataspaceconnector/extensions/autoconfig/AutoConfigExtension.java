@@ -5,16 +5,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.dataspaceconnector.dataloading.AssetLoader;
+import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
 import org.eclipse.dataspaceconnector.extensions.autoconfig.service.OAuthLoginService;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
+import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.policy.store.PolicyStore;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
+import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.types.domain.DataAddress;
@@ -40,9 +41,9 @@ public class AutoConfigExtension implements ServiceExtension {
     @Inject
     private ContractDefinitionStore contractStore;
     @Inject
-    private AssetLoader loader;
+    private AssetIndex loader;
     @Inject
-    private PolicyStore policyStore;
+    private PolicyDefinitionStore policyStore;
     @Inject
     private OkHttpClient httpClient;
 
@@ -106,7 +107,7 @@ public class AutoConfigExtension implements ServiceExtension {
         schedulerHandle.cancel(true);
     }
 
-    private Policy createPolicy(ServiceExtensionContext context) {
+    private PolicyDefinition createPolicy(ServiceExtensionContext context) {
         var assetID = context.getSetting(ASSET_ID, "42424242424242");
 
         context.getMonitor().debug("Using assetID '"+ assetID +"'");
@@ -116,10 +117,12 @@ public class AutoConfigExtension implements ServiceExtension {
                 .target(assetID)
                 .build();
 
-        return Policy.Builder.newInstance()
+        return PolicyDefinition.Builder.newInstance()
                 .id(POLICY_ID)
-                .permission(usePermission)
-                .target(assetID)
+                .policy(Policy.Builder.newInstance()
+                        .permission(usePermission)
+                        .build())
+                //.target(assetID)
                 .build();
     }
 
@@ -137,7 +140,7 @@ public class AutoConfigExtension implements ServiceExtension {
 
         var dataAddressBuilder = DataAddress.Builder.newInstance()
                 .property("type", "HttpData")
-                .property("endpoint", endpointURL)
+                .property("baseUrl", endpointURL)
                 .property("proxyMethod", "true")
                 .property("proxyBody", "true")
                 .property("proxyPath", "true")

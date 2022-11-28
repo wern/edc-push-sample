@@ -4,6 +4,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
+val javaVersion = 11
 val edcGroup = "org.eclipse.dataspaceconnector"
 val edcVersion = "0.0.1-SNAPSHOT"
 
@@ -11,6 +12,7 @@ dependencies {
     api("$edcGroup:core-boot:$edcVersion")
     api("$edcGroup:core-base:$edcVersion")
     api("$edcGroup:http:$edcVersion")
+    api("$edcGroup:runtime-metamodel:$edcVersion")
 
     api("$edcGroup:filesystem-configuration:$edcVersion")
 
@@ -31,6 +33,12 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     exclude("**/pom.properties", "**/pom.xm")
     mergeServiceFiles()
     archiveFileName.set("edc.jar")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(javaVersion))
+    }
 }
 
 repositories {

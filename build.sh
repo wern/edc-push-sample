@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd edc
-./gradlew publishToMavenLocal -x test
+./gradlew clean publishToMavenLocal -x test -x javadoc -Pskip.signing=true
 
 cd ../edc-controlplane-memory
 ./gradlew clean build

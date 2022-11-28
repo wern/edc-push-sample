@@ -76,6 +76,8 @@ public class ApiWrapperController {
     @GET
     @Path("/{assetId}/{subUrl:.+}")
     public String getWrapper(@QueryParam("provider-connector-url") String providerConnectorUrl, @PathParam("assetId") String assetId, @PathParam("subUrl") String subUrl, @Context UriInfo uriInfo) throws InterruptedException {
+        monitor.debug("GET call on asset " +assetId + " with service call "+ subUrl);
+        
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
         // Initialize and negotiate everything
@@ -132,6 +134,8 @@ public class ApiWrapperController {
     @Path("/{assetId}/{subUrl:.+}")
     @Consumes(MediaType.APPLICATION_JSON)
     public String putWrapper(@QueryParam("provider-connector-url") String providerConnectorUrl, @PathParam("assetId") String assetId, @PathParam("subUrl") String subUrl, String body, @Context UriInfo uriInfo) throws InterruptedException {
+        monitor.debug("PUT call on asset " +assetId + " with service call "+ subUrl);
+
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
         // Initialize and negotiate everything
@@ -200,7 +204,7 @@ public class ApiWrapperController {
         );
 
         var patchedPolicy = Policy.Builder.newInstance()
-                                .id(contractOffer.getPolicy().getUid())
+                                //.id(/*contractOffer.getPolicy().getUid() */ null)
                                 .permission(
                                     Permission.Builder.newInstance()
                                     .target(assetId)

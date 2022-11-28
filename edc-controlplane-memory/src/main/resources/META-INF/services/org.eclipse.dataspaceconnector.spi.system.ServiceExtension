@@ -1,1 +1,2 @@
 org.eclipse.dataspaceconnector.extensions.autoconfig.AutoConfigExtension
+org.eclipse.dataspaceconnector.extensions.dataplaneselector.DataPlaneSelectorConfigurationServiceExtension
