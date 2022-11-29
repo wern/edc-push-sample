@@ -1,6 +1,9 @@
 #!/bin/bash
 
-cd edc
+cd ./GradlePlugins
+./gradlew clean publishToMavenLocal -x test -x javadoc -Pskip.signing=true
+
+cd ../edc
 ./gradlew clean publishToMavenLocal -x test -x javadoc -Pskip.signing=true
 
 cd ../edc-controlplane-memory

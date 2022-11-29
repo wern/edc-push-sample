@@ -1,3 +1,6 @@
 [submodule "edc"]
 	path = edc
 	url = https://github.com/eclipse-dataspaceconnector/DataSpaceConnector/
+[submodule "GradlePlugins"]
+	path = GradlePlugins
+	url = https://github.com/paullatzelsperger/GradlePlugins
