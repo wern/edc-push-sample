@@ -36,6 +36,7 @@ public class AutoConfigExtension implements ServiceExtension {
     private static final String CLIENT_ID = "pcf.asset.auth.oidc.client.id";
     private static final String CLIENT_SECRET = "pcf.asset.auth.oidc.client.secret";
     private static final String AUTH_AUDIENCE = "pcf.asset.auth.oidc.auth.audience";
+    private static final String REFRESH_INTERVAL_MINS= "pcf.asset.auth.oidc.auth.refresh.interval.mins";
 
 
     @Inject
@@ -99,7 +100,7 @@ public class AutoConfigExtension implements ServiceExtension {
             }
          };
          schedulerHandle =
-            scheduler.scheduleAtFixedRate(assetUpdater, 0, 60, TimeUnit.MINUTES);
+            scheduler.scheduleAtFixedRate(assetUpdater, 0, Integer.parseInt(context.getSetting(REFRESH_INTERVAL_MINS, "25")), TimeUnit.MINUTES);
     }
     
     public void shutdown() {
