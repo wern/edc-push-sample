@@ -1,3 +1,4 @@
+edc-dataplane/bin/
 api-wrapper/bin/
 edc-controlplane-memory/bin
 pcf-demo-provider/bin

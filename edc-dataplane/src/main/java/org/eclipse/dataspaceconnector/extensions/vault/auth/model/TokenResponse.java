@@ -1,4 +1,4 @@
-package org.eclipse.dataspaceconnector.extensions.autoconfig.model;
+package org.eclipse.dataspaceconnector.extensions.vault.auth.model;
 
 public class TokenResponse {
     public String access_token;

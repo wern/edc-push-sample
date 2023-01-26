@@ -9,6 +9,7 @@ val javaVersion = 11
 dependencies {
     val edcGroup = "org.eclipse.dataspaceconnector"
     val edcVersion = "0.0.1-SNAPSHOT"
+    val jupiterVersion = "5.8.2"
 
     // Config
     api("$edcGroup:filesystem-configuration:$edcVersion")
@@ -36,6 +37,10 @@ dependencies {
 
     // Supportive includes jetty and jersey
     api("$edcGroup:http:$edcVersion")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
 }
 
 java {
@@ -60,4 +65,8 @@ repositories {
     maven {
         url = uri("https://maven.iais.fraunhofer.de/artifactory/eis-ids-public/")
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

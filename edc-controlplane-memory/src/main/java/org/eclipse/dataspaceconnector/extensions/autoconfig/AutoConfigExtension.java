@@ -6,7 +6,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
-import org.eclipse.dataspaceconnector.extensions.autoconfig.service.OAuthLoginService;
 import org.eclipse.dataspaceconnector.policy.model.Action;
 import org.eclipse.dataspaceconnector.policy.model.Permission;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
@@ -31,7 +30,7 @@ public class AutoConfigExtension implements ServiceExtension {
     private static final String ASSET_ID = "pcf.asset.id";
     private static final String PCF_ENDPOINT = "pcf.asset.endpoint";
     private static final String AUTH_KEY = "pcf.asset.auth.key";
-    private static final String AUTH_CODE = "pcf.asset.auth.code";
+    private static final String SECRET_NAME = "pcf.asset.auth.secret.name";
     private static final String IDP_URL = "pcf.asset.auth.oidc.idp.url";
     private static final String CLIENT_ID = "pcf.asset.auth.oidc.client.id";
     private static final String CLIENT_SECRET = "pcf.asset.auth.oidc.client.secret";
@@ -52,60 +51,23 @@ public class AutoConfigExtension implements ServiceExtension {
 
     private ServiceExtensionContext context;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
-    private ScheduledFuture<?> schedulerHandle;
 
-    private OAuthLoginService loginService;
+    @Override
+    public String name() {
+        return "Asset Auto Config Ext.";
+    }
 
+    @Override
     public void initialize(ServiceExtensionContext context) {
         this.monitor = context.getMonitor();
         this.context = context;
-        loginService = new OAuthLoginService(monitor, httpClient);
-        var authCode = context.getSetting(AUTH_CODE, "");
         var policy = createPolicy(context);
         policyStore.save(policy);
 
-        registerDataEntries(context, authCode, false);
+        registerDataEntries(context, false);
         registerContractDefinition(policy.getUid());
 
         monitor.info("AutoRegisterAssetExtension initialized, Assets registered.");
-    }
-
-    public void start() {
-        monitor.info("AutoRegisterAssetExtension starting... ");
-        final Runnable assetUpdater = new Runnable() {
-            public void run() { 
-                monitor.debug("Trying to refresh asset...");
-                var idpUrl = context.getSetting(IDP_URL, "");
-                var clientId = context.getSetting(CLIENT_ID, "");
-                var clientSecret = context.getSetting(CLIENT_SECRET, "");
-                var audience = context.getSetting(AUTH_AUDIENCE, "");
-
-                if( isIdpConfigurationMissing(idpUrl, clientId, clientSecret, audience)){
-                    monitor.info("No IDP information configured. Token refresh disabled!");
-                    return;
-                }
-
-                try{
-                    registerDataEntries(context, "Bearer " + loginService.getToken(idpUrl, clientId, clientSecret, audience), true); 
-                }catch(Throwable t){
-                    monitor.severe("Something went wrong while recreationg the asset", t);
-                }
-                monitor.debug("Done!");
-            }
-
-            private boolean isIdpConfigurationMissing(String idpUrl, String clientId, String clientSecret, String audience) {
-                return idpUrl.isBlank() || clientId.isBlank() || clientSecret.isBlank() || audience.isBlank();
-            }
-         };
-         schedulerHandle =
-            scheduler.scheduleAtFixedRate(assetUpdater, 0, Integer.parseInt(context.getSetting(REFRESH_INTERVAL_MINS, "25")), TimeUnit.MINUTES);
-    }
-    
-    public void shutdown() {
-        monitor.info("AutoRegisterAssetExtension shutting down... ");
-        schedulerHandle.cancel(true);
     }
 
     private PolicyDefinition createPolicy(ServiceExtensionContext context) {
@@ -127,17 +89,18 @@ public class AutoConfigExtension implements ServiceExtension {
                 .build();
     }
 
-    private void registerDataEntries(ServiceExtensionContext context, String authCode, boolean removeOldAsset) {
+    private void registerDataEntries(ServiceExtensionContext context, boolean removeOldAsset) {
 
         var monitor = context.getMonitor();
 
         var endpointURL = context.getSetting(PCF_ENDPOINT, "not set!");
         var assetID = context.getSetting(ASSET_ID, "42424242424242");
-        var authKey = context.getSetting(AUTH_KEY, "");
+        var authKey = context.getSetting(AUTH_KEY, "Authorization");
+        var secretName = context.getSetting(SECRET_NAME, "DynamicOAuthToken");
 
         monitor.debug("Using endpoint '"+ endpointURL +"'");
         monitor.debug("Using authKey '"+ authKey +"'");
-        monitor.debug("Using authCode '"+ authCode +"'");
+        monitor.debug("Using secretName '"+ secretName +"'");
 
         var dataAddressBuilder = DataAddress.Builder.newInstance()
                 .property("type", "HttpData")
@@ -147,15 +110,14 @@ public class AutoConfigExtension implements ServiceExtension {
                 .property("proxyPath", "true")
                 .property("proxyQueryParams", "true");
 
-        if(authKey!=null && authCode!=null){
+        if(authKey!=null ){
             dataAddressBuilder.property("authKey", authKey)
-                              .property("authCode", authCode);
+                              .property("secretName", secretName);
         } else {
             monitor.warning("No authorization info configured for asset " + assetID);
         }
 
         var dataAddress = dataAddressBuilder.build();
-
 
         var asset = Asset.Builder.newInstance()
                 .id(assetID)

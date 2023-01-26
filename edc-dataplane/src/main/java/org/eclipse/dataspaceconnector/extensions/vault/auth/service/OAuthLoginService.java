@@ -1,8 +1,8 @@
-package org.eclipse.dataspaceconnector.extensions.autoconfig.service;
+package org.eclipse.dataspaceconnector.extensions.vault.auth.service;
 
 import java.io.IOException;
 
-import org.eclipse.dataspaceconnector.extensions.autoconfig.model.TokenResponse;
+import org.eclipse.dataspaceconnector.extensions.vault.auth.model.TokenResponse;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 
 import com.fasterxml.jackson.annotation.PropertyAccessor;
