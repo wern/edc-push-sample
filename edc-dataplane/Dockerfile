@@ -1,7 +1,7 @@
 #FROM openjdk:11-jre-slim-buster
 FROM gcr.io/distroless/java11-debian11
 
-ENV JAVA_TOOL_OPTIONS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8090
+#ENV JAVA_TOOL_OPTIONS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8090
 ARG JAR
 ARG LIB
 

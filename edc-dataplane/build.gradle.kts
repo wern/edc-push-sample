@@ -38,6 +38,9 @@ dependencies {
     // Supportive includes jetty and jersey
     api("$edcGroup:http:$edcVersion")
 
+    // JAX-RS
+    api("jakarta.ws.rs:jakarta.ws.rs-api:3.0.0")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${jupiterVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${jupiterVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
