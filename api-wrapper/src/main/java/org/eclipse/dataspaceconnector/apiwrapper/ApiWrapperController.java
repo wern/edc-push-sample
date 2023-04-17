@@ -168,6 +168,7 @@ public class ApiWrapperController {
         var agreementId = initializeContractNegotiation(providerConnectorUrl, assetId);
 
         // Initiate transfer process
+        // ToDo handle invalid agreementId
         transferProcessService.initiateHttpProxyTransferProcess(
                 agreementId,
                 assetId,

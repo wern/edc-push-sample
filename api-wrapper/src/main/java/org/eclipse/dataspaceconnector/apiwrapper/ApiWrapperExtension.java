@@ -106,7 +106,7 @@ public class ApiWrapperExtension implements ServiceExtension {
         }
 
         // In-memory stores
-        var endpointDataReferenceStore = new InMemoryEndpointDataReferenceStore();
+        var endpointDataReferenceStore = new InMemoryEndpointDataReferenceStore(context.getMonitor(), config.getEndpointDataReferenceCacheTimeInMinutes());
         var contractAgreementStore = new InMemoryContractAgreementStore();
 
         // Setup controller
@@ -160,6 +160,9 @@ public class ApiWrapperExtension implements ServiceExtension {
             }
             builder.basicAuthUsers(basicAuthUsers);
         }
+
+        //Configure caching time of EndpointDataReference
+        builder.endpointDataReferenceCacheTimeInMinutes(config.getInteger(ApiWrapperConfigKeys.ENDPOINT_REF_CACHETIME_IN_MINS, 2));
 
         //Enable some temporary data fixes, if needed
         builder.fixNotNullFields(config.getString(ApiWrapperConfigKeys.DATA_FIX_NOTNULL_FIELDS,"").split(","));

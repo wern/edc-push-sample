@@ -25,5 +25,9 @@ public final class ApiWrapperConfigKeys {
     @EdcSetting
     public static final String DATA_FIX_NOTNULL_FIELDS="wrapper.data.fix.notnullable.fields";
 
+    @EdcSetting
+    public static final String ENDPOINT_REF_CACHETIME_IN_MINS="wrapper.endpoint.reference.cachetime.minutes";
+
+
     private ApiWrapperConfigKeys() {}
 }

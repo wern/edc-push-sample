@@ -14,8 +14,9 @@ public class ApiWrapperConfig {
     private final String authApiKeyValue;
     private final Map<String, String> basicAuthUsers;
     private final List<String> fixNotNullFields;
+    private final int endpointDataReferenceCacheTimeInMinutes; 
 
-    public ApiWrapperConfig(String consumerEDCUrl, String consumerEdcApiKeyName, String consumerEdcApiKeyValue, String authApiKeyName, String authApiKeyValue, Map<String, String> basicAuthUsers, List<String> fixNotNullFields) {
+    public ApiWrapperConfig(String consumerEDCUrl, String consumerEdcApiKeyName, String consumerEdcApiKeyValue, String authApiKeyName, String authApiKeyValue, Map<String, String> basicAuthUsers, List<String> fixNotNullFields, int endpointDataReferenceCacheTimeInMinutes) {
         this.consumerEDCUrl = consumerEDCUrl;
         this.consumerEdcApiKeyName = consumerEdcApiKeyName;
         this.consumerEdcApiKeyValue = consumerEdcApiKeyValue;
@@ -23,6 +24,7 @@ public class ApiWrapperConfig {
         this.authApiKeyValue = authApiKeyValue;
         this.basicAuthUsers = basicAuthUsers;
         this.fixNotNullFields = fixNotNullFields;
+        this.endpointDataReferenceCacheTimeInMinutes = endpointDataReferenceCacheTimeInMinutes;
     }
 
     public String getConsumerEDCUrl() {
@@ -53,6 +55,10 @@ public class ApiWrapperConfig {
         return fixNotNullFields;
     }
 
+    public int getEndpointDataReferenceCacheTimeInMinutes() {
+        return endpointDataReferenceCacheTimeInMinutes;
+    }
+
     public static final class Builder {
         private String consumerEdcUrl = null;
         private String consumerEdcApiKeyName = "X-Api-Key";
@@ -61,6 +67,7 @@ public class ApiWrapperConfig {
         private String authApiKeyValue = null;
         private Map<String, String> basicAuthUsers = Collections.emptyMap();
         private List<String> fixNotNullFields = Collections.emptyList();
+        private int endpointDataReferenceCacheTimeInMinutes=2; 
 
         private Builder() {
         }
@@ -104,8 +111,13 @@ public class ApiWrapperConfig {
             return this;
         }
 
+        public Builder endpointDataReferenceCacheTimeInMinutes(int timeout) {
+            this.endpointDataReferenceCacheTimeInMinutes  = timeout;
+            return this;
+        }
+
         public ApiWrapperConfig build() {
-            return new ApiWrapperConfig(consumerEdcUrl, consumerEdcApiKeyName, consumerEdcApiKeyValue, authApiKeyName, authApiKeyValue, basicAuthUsers, fixNotNullFields);
+            return new ApiWrapperConfig(consumerEdcUrl, consumerEdcApiKeyName, consumerEdcApiKeyValue, authApiKeyName, authApiKeyValue, basicAuthUsers, fixNotNullFields, endpointDataReferenceCacheTimeInMinutes);
         }
     }
 }
