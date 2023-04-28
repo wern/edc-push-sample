@@ -104,7 +104,10 @@ public class HttpProxyService {
         HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
         for (Map.Entry<String, List<String>> param : parameters.entrySet()) {
             for (String value : param.getValue()) {
-                httpBuilder = httpBuilder.addQueryParameter(param.getKey(), value);
+                // We add not null params only (fixing requestID Bug on PCF Update)
+                if(value!=null && !value.trim().equals("")){
+                    httpBuilder = httpBuilder.addQueryParameter(param.getKey(), value);
+                }
             }
         }
 
