@@ -4,3 +4,6 @@
 [submodule "GradlePlugins"]
 	path = GradlePlugins
 	url = https://github.com/paullatzelsperger/GradlePlugins
+[submodule "productedc/product-edc"]
+	path = productedc/product-edc
+	url = https://github.com/catenax-ng/product-edc.git

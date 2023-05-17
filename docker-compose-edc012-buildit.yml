@@ -3,16 +3,19 @@ version: "3.9"
 services:
   provider-controlplane:
     build:
-      context: productedc/edc-controlplane-memory
+      context: edc-controlplane-memory
+      #context: productedc/edc-controlplane-memory
       args:
-        JAR: target/edc-controlplane-memory.jar
-        LIB: target/lib
+        JAR: build/libs/edc.jar
+        #JAR: target/edc-controlplane-memory.jar
+        #LIB: target/lib
     ports:
       # "8282" ids port is only used between the connectors and doesn't need to be exposed
       - "7171:7171" # default/control (8181:9191)
       - "7174:7174" # validation (8184:9192)
       - "7172:7172" # data (8187:9193)
       - "7175:7175" # management
+    #  - "4005:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -23,19 +26,22 @@ services:
     volumes:
       - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Provider/docker/vault.properties:/app/vault.properties
-      - ./config/Provider/docker/pedc/controlplane.configuration.properties:/app/configuration.properties
+      - ./config/Provider/docker/controlplane.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
 
   provider-dataplane:
     build:
-      context: productedc/edc-dataplane-filesystem-vault
+      context: edc-dataplane
+      #context: productedc/edc-dataplane-filesystem-vault
       args:
-        JAR: target/edc-dataplane-filesystem-vault.jar
-        LIB: target/lib
+        JAR: build/libs/edc.jar
+        #JAR: target/edc-dataplane-filesystem-vault.jar
+        #LIB: target/lib
     ports:
       - "7270:7270" # default (8182:9191)
       - "7272:7272" # public (8283:9192)
       - "7399:7399" # custom endpoint-proxy
+    #  - "4006:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -45,37 +51,41 @@ services:
     volumes:
       - ./config/Provider/docker/cert.pfx:/app/cert.pfx
       - ./config/Provider/docker/vault.properties:/app/vault.properties
-      - ./config/Provider/docker/pedc/dataplane.configuration.properties:/app/configuration.properties
+      - ./config/Provider/docker/dataplane.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
 
   provider-apiwrapper:
     build:
-      context: productedc/api-wrapper
+      context: api-wrapper
       args:
         JAR: build/libs/edc.jar
     ports:
       - "3131:3131" # Wrapper endpoint (callback 3132 needed only internaly)
+      - "4007:8090" # debugging
     environment:
       WRAPPER_CONSUMER_EDC_APIKEY_VALUE: password
       WRAPPER_AUTH_APIKEY_VALUE: APIpassword
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./config/Provider/docker/pedc/api-wrapper.configuration.properties:/app/configuration.properties
+      - ./config/Provider/docker/api-wrapper.configuration.properties:/app/configuration.properties
       - ./config/Provider/docker/logging.properties:/app/logging.properties
 
   consumer-controlplane:
     build:
-      context: productedc/edc-controlplane-memory
+      context: edc-controlplane-memory
+      #context: productedc/edc-controlplane-memory
       args:
-        JAR: target/edc-controlplane-memory.jar
-        LIB: target/lib
+        JAR: build/libs/edc.jar
+        #JAR: target/edc-controlplane-memory.jar
+        #LIB: target/lib
     ports:
       # - "8182:8282" # ids
       - "9191:9191" # default/control
       - "9194:9194" # validation
       - "9192:9192" # data
       - "9195:9195" # management
+    #  - "4008:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -86,19 +96,22 @@ services:
     volumes:
       - ./config/Consumer/docker/cert.pfx:/app/cert.pfx
       - ./config/Consumer/docker/vault.properties:/app/vault.properties
-      - ./config/Consumer/docker/pedc/controlplane.configuration.properties:/app/configuration.properties
+      - ./config/Consumer/docker/controlplane.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
 
   consumer-dataplane:
     build:
-      context: productedc/edc-dataplane-filesystem-vault
+      context: edc-dataplane
+      #context: productedc/edc-dataplane-filesystem-vault
       args:
-        JAR: target/edc-dataplane-filesystem-vault.jar
-        LIB: target/lib
+        JAR: build/libs/edc.jar
+        #JAR: target/edc-dataplane-filesystem-vault.jar
+        #LIB: target/lib
     ports:
       - "9291:9291" # default (8192:9191)
       - "9292:9292" # public (8183:9192)
       - "9399:9399" # custom endpoint-proxy
+    #  - "4009:8090" # debugging
     environment:
       EDC_VAULT: /app/vault.properties
       EDC_KEYSTORE: /app/cert.pfx
@@ -108,23 +121,24 @@ services:
     volumes:
       - ./config/Consumer/docker/cert.pfx:/app/cert.pfx
       - ./config/Consumer/docker/vault.properties:/app/vault.properties
-      - ./config/Consumer/docker/pedc/dataplane.configuration.properties:/app/configuration.properties
+      - ./config/Consumer/docker/dataplane.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
 
   consumer-apiwrapper:
     build:
-      context: productedc/api-wrapper
+      context: api-wrapper
       args:
         JAR: build/libs/edc.jar
     ports:
       - "2121:2121" # Wrapper endpoint (callback 2122 needed only internaly)
+    #  - "4010:8090" # debugging
     environment:
       WRAPPER_CONSUMER_EDC_APIKEY_VALUE: password
       WRAPPER_AUTH_APIKEY_VALUE: APIpassword
       CONFIGURATION_PROPERTIES_FILE: /app/configuration.properties
       LOGGING_PROPERTIES_FILE: /app/logging.properties
     volumes:
-      - ./config/Consumer/docker/pedc/api-wrapper.configuration.properties:/app/configuration.properties
+      - ./config/Consumer/docker/api-wrapper.configuration.properties:/app/configuration.properties
       - ./config/Consumer/docker/logging.properties:/app/logging.properties
 
   sample-pcf-app:
@@ -134,5 +148,6 @@ services:
         API_WRAPPER_URL: http://provider-api-wrapper:3131/api/service/194f0160-cef1-4cb3-a6f1-1d917b4e39c0-fec89cf0-9382-4d68-8cea-dae797b7b8ae/productIds/$productId?BPN=$BPN&requestId=$requestId&provider-connector-url=http://consumer-controlplane:9193         
     ports:
       - "5050:5050" # for testing purpose only
+    #  - "4011:8090" # debugging
     volumes:
       - ./config/PcfApp/docker/logging.properties:/app/logging.properties

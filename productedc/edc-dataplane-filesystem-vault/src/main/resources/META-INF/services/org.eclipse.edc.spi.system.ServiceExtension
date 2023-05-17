@@ -1,0 +1,2 @@
+org.eclipse.dataspaceconnector.extensions.vault.DynamicVaultExtension
+org.eclipse.dataspaceconnector.extensions.proxy.HttpProxyExtension

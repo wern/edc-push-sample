@@ -6,6 +6,9 @@ cd ./GradlePlugins
 cd ../edc
 ./gradlew clean publishToMavenLocal -x test -x javadoc -Pskip.signing=true
 
+cd ../productedc
+./build.sh
+
 cd ../edc-controlplane-memory
 ./gradlew clean build
 

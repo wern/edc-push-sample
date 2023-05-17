@@ -1,7 +1,9 @@
 # edc-push-sample
 
+Usage of eclipse EDC version directly is no longer maintained. For latest updates use productedc based version located in folder `./prodcutedc`. Please be aware that `./productedc/api-wrapper` still uses eclipse EDC version, so all versions must be build up front!
+
 ## Preperation
-You need to update the edc submodule before the build is started.
+You need to update the referenced submodules before the build is started.
 
 ```shell
 git submodule update --init
@@ -13,6 +15,7 @@ To build all components in one command, execute the following script.
 
 ```shell
 ./build.sh
+
 ```
 
 ## Configure DAPS
@@ -34,8 +37,9 @@ Add your own certificates (registered with DAPS) to the keystores and vaults.
 ./config/Provider/docker/vault.properties
 ```
 
-## Run it without using DAPS (local testing only!)
+## Run it without using DAPS (eclipse EDC and local testing only!)
 Want to use mock-IAM only and git rid of all the DAPS configuration stuff? Just checkout the corresponding version using:
+
 ```shell
 git checkout df8395ee
 ```
