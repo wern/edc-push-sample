@@ -2,6 +2,7 @@ edc-dataplane/bin/
 api-wrapper/bin/
 edc-controlplane-memory/bin
 pcf-demo-provider/bin
+productedc/**/bin
 build/
 target/
 lib/
