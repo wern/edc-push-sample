@@ -13,4 +13,8 @@ public class InMemoryContractAgreementStore {
     public String get(String assetId) {
         return store.get(assetId);
     }
+
+    public void remove(String assetId){
+        store.remove(assetId);
+    }
 }

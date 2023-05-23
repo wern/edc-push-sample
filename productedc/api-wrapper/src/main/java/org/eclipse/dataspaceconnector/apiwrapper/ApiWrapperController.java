@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Consumes()
 @Produces({MediaType.APPLICATION_JSON})
@@ -38,7 +36,6 @@ public class ApiWrapperController {
 
     // Connection configurations
     private static final String IDS_PATH = "/api/v1/ids/data";
-    private static final Pattern RESPONSE_PATTERN = Pattern.compile("\\{\"data\":\"(?<embeddedData>.*)\"\\}");
     private final String consumerConnectorUrl;
     private final String httpReceiverEndpoint;
 
@@ -92,12 +89,6 @@ public class ApiWrapperController {
         String data = "";
         try {
             data = httpProxyService.sendGETRequest(dataReference, subUrl, queryParams);
-            Matcher dataMatcher = RESPONSE_PATTERN.matcher(data);
-            while (dataMatcher.matches()) {
-                data = dataMatcher.group("embeddedData");
-                data = data.replace("\\\"", "\"").replace("\\\\", "\\");
-                dataMatcher = RESPONSE_PATTERN.matcher(data);
-            }
         } catch (IOException e) {
             monitor.severe("Call against consumer control plane failed!", e);
         }
@@ -123,12 +114,6 @@ public class ApiWrapperController {
                     body,
                     Objects.requireNonNull(okhttp3.MediaType.parse("application/json"))
             );
-            Matcher dataMatcher = RESPONSE_PATTERN.matcher(data);
-            while (dataMatcher.matches()) {
-                data = dataMatcher.group("embeddedData");
-                data = data.replace("\\\"", "\"").replace("\\\\", "\\");
-                dataMatcher = RESPONSE_PATTERN.matcher(data);
-            }
         } catch (IOException e) {
             monitor.severe("Call against consumer control plane failed!", e);
         }
@@ -156,12 +141,6 @@ public class ApiWrapperController {
                     body,
                     Objects.requireNonNull(okhttp3.MediaType.parse("application/json"))
             );
-            Matcher dataMatcher = RESPONSE_PATTERN.matcher(data);
-            while (dataMatcher.matches()) {
-                data = dataMatcher.group("embeddedData");
-                data = data.replace("\\\"", "\"").replace("\\\\", "\\");
-                dataMatcher = RESPONSE_PATTERN.matcher(data);
-            }
         } catch (IOException e) {
             monitor.severe("Call against consumer control plane failed!", e);
         }
@@ -173,7 +152,6 @@ public class ApiWrapperController {
         var agreementId = initializeContractNegotiation(providerConnectorUrl, assetId);
 
         // Initiate transfer process
-        // ToDo handle invalid agreementId
         transferProcessService.initiateHttpProxyTransferProcess(
                 agreementId,
                 assetId,
@@ -184,12 +162,18 @@ public class ApiWrapperController {
         );
 
         EndpointDataReference dataReference = null;
-        while (dataReference == null) {
+        for (int i=0; dataReference == null && i < 60; i++) {
             Thread.sleep(1000);
             dataReference = endpointDataReferenceStore.get(agreementId);
         }
 
-        return dataReference;
+        if(dataReference != null) {
+            return dataReference;
+        } else {
+            // let's initiate a new negotiation (looks like agreement is outdated)
+            contractAgreementStore.remove(assetId);
+            return negotiateContractAndRetrieveEndpointDataReference(providerConnectorUrl, assetId);
+        }
     }
 
     private String initializeContractNegotiation(String providerConnectorUrl, String assetId) throws InterruptedException {
